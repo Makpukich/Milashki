@@ -34,8 +34,7 @@ class DateBaseHelper:
         await session.close()
 
 
-
 db_helper = DateBaseHelper(
-    url=settings.db_url,
-    echo=settings.db_echo
+    url=settings.db.url,
+    echo=settings.db.echo
 )
