@@ -7,8 +7,6 @@ from fastapi import (
     status,
 )
 from fastapi.security import (
-    # HTTPBearer,
-    # HTTPAuthorizationCredentials,
     OAuth2PasswordBearer,
 )
 from pydantic import BaseModel
@@ -16,7 +14,6 @@ from pydantic import BaseModel
 from auth import utils as auth_utils
 from users.schemas import UserSchema
 
-# http_bearer = HTTPBearer()
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl="/api/demo-auth/jwt/login/",
 )
@@ -32,7 +29,6 @@ router = APIRouter(prefix="/jwt", tags=["JWT"])
 john = UserSchema(
     username="john",
     password=auth_utils.hash_password("qwerty"),
-    email="john@example.com",
 )
 sam = UserSchema(
     username="sam",
@@ -72,10 +68,8 @@ def validate_auth_user(
 
 
 def get_current_token_payload(
-    # credentials: HTTPAuthorizationCredentials = Depends(http_bearer),
     token: str = Depends(oauth2_scheme),
 ) -> dict:
-    # token = credentials.credentials
     try:
         payload = auth_utils.decode_jwt(
             token=token,
@@ -84,7 +78,6 @@ def get_current_token_payload(
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=f"invalid token error: {e}",
-            # detail=f"invalid token error",
         )
     return payload
 
@@ -117,10 +110,9 @@ def auth_user_issue_jwt(
     user: UserSchema = Depends(validate_auth_user),
 ):
     jwt_payload = {
-        # subject
         "sub": user.username,
         "username": user.username,
-        "email": user.email,
+        #"email": user.email,
         # "logged_in_at"
     }
     token = auth_utils.encode_jwt(jwt_payload)
@@ -138,6 +130,6 @@ def auth_user_check_self_info(
     iat = payload.get("iat")
     return {
         "username": user.username,
-        "email": user.email,
+        #"email": user.email,
         "logged_in_at": iat,
     }
