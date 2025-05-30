@@ -19,7 +19,7 @@ async  def create_product(product_in: ProductCreate, session: AsyncSession = Dep
 async def get_product(product_id:int, session: AsyncSession = Depends(db_helper.scoped_session_dependency)):
     product =  await crud.get_product(session=session, product_id = product_id)
     if product is not None:
-        return product
+        return {"product id": product_id}
     raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND
     )
