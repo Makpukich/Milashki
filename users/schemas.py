@@ -15,12 +15,3 @@ class AccountResponse(AccountBase):
 
     class Config:
         from_attributes = True
-
-class UserSchema(BaseModel):
-    model_config = ConfigDict(strict=True)
-
-    username: str
-    password: str
-    #email: EmailStr | None = None
-    admin: bool = False
-    active: bool = True
