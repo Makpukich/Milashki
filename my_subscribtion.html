@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мои подписки</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .back-btn {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 8px 15px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .back-btn:hover {
+            background-color: #2980b9;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(52, 152, 219, 0.3);
+            border-radius: 50%;
+            border-top-color: #3498db;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .status-active {
+            color: #2ecc71;
+            font-weight: bold;
+        }
+
+        .status-inactive {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/main.html" class="back-btn">← Назад</a>
+        <h1>Мои подписки</h1>
+
+        <div id="loadingIndicator" style="text-align: center; margin: 30px 0;">
+            <div class="loading"></div> Загрузка данных...
+        </div>
+
+        <div id="content" style="display: none;">
+            <table id="subscriptionsTable">
+                <thead>
+                    <tr>
+                        <th>ID подписки</th>
+                        <th>Дата покупки</th>
+                        <th>Статус</th>
+                    </tr>
+                </thead>
+                <tbody id="subscriptionsBody">
+                    <!-- Данные будут загружены через JavaScript -->
+                </tbody>
+            </table>
+
+            <div id="noSubscriptions" style="text-align: center; margin: 30px 0; display: none;">
+                <p>У вас пока нет активных подписок.</p>
+                <a href="/possible_subscribtions" class="back-btn">Посмотреть доступные подписки</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Проверяем авторизацию
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                window.location.href = '/login.html';
+                return;
+            }
+
+            // Загружаем данные о подписках
+            await loadSubscriptions();
+        });
+
+        async function loadSubscriptions() {
+            try {
+                const response = await fetch('/api/subscriptions/my', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Ошибка загрузки данных');
+                }
+
+                const subscriptions = await response.json();
+
+                // Скрываем индикатор загрузки
+                document.getElementById('loadingIndicator').style.display = 'none';
+                document.getElementById('content').style.display = 'block';
+
+                if (subscriptions.length === 0) {
+                    document.getElementById('noSubscriptions').style.display = 'block';
+                    document.getElementById('subscriptionsTable').style.display = 'none';
+                    return;
+                }
+
+                // Заполняем таблицу данными
+                const tbody = document.getElementById('subscriptionsBody');
+                tbody.innerHTML = '';
+
+                subscriptions.forEach(sub => {
+                    const row = document.createElement('tr');
+
+                    // ID подписки
+                    const idCell = document.createElement('td');
+                    idCell.textContent = sub.id;
+                    row.appendChild(idCell);
+
+                    // Дата покупки
+                    const dateCell = document.createElement('td');
+                    const date = new Date(sub.time_buy);
+                    dateCell.textContent = date.toLocaleString('ru-RU');
+                    row.appendChild(dateCell);
+
+                    // Статус
+                    const statusCell = document.createElement('td');
+                    const statusSpan = document.createElement('span');
+                    statusSpan.textContent = sub.active ? 'Активна' : 'Неактивна';
+                    statusSpan.className = sub.active ? 'status-active' : 'status-inactive';
+                    statusCell.appendChild(statusSpan);
+                    row.appendChild(statusCell);
+
+                    tbody.appendChild(row);
+                });
+
+            } catch (error) {
+                console.error('Ошибка:', error);
+                document.getElementById('loadingIndicator').innerHTML =
+                    '<p style="color: #e74c3c;">Ошибка загрузки данных. Пожалуйста, попробуйте позже.</p>';
+            }
+        }
+    </script>
+</body>
+</html>

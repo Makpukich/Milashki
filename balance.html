@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мой баланс</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            padding: 30px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+
+        .back-btn {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 8px 15px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .back-btn:hover {
+            background-color: #2980b9;
+        }
+
+        .balance-amount {
+            font-size: 48px;
+            font-weight: bold;
+            margin: 20px 0;
+            color: #2c3e50;
+        }
+
+        .balance-label {
+            font-size: 18px;
+            color: #7f8c8d;
+            margin-bottom: 10px;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(52, 152, 219, 0.3);
+            border-radius: 50%;
+            border-top-color: #3498db;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/main.html" class="back-btn">← Назад</a>
+        <h1>Мой баланс</h1>
+
+        <div id="loadingIndicator">
+            <div class="loading"></div> Загрузка данных...
+        </div>
+
+        <div id="balanceInfo" style="display: none;">
+            <div class="balance-label">Текущий баланс</div>
+            <div class="balance-amount" id="balanceAmount">0 ₽</div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Проверяем авторизацию
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                window.location.href = '/login.html';
+                return;
+            }
+
+            // Загружаем данные о балансе
+            try {
+                const response = await fetch('/api/balance', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Ошибка загрузки баланса');
+                }
+
+                const balanceData = await response.json();
+
+                // Обновляем интерфейс
+                document.getElementById('balanceAmount').textContent = `${balanceData.amount} ₽`;
+                document.getElementById('loadingIndicator').style.display = 'none';
+                document.getElementById('balanceInfo').style.display = 'block';
+
+            } catch (error) {
+                console.error('Ошибка:', error);
+                document.getElementById('loadingIndicator').innerHTML =
+                    '<p style="color: #e74c3c;">Ошибка загрузки баланса. Пожалуйста, попробуйте позже.</p>';
+            }
+        });
+    </script>
+</body>
+</html>
