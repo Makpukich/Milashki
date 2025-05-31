@@ -1,149 +1,132 @@
+from fastapi import APIRouter, Depends, Form, HTTPException, status, Request
+from fastapi.security import OAuth2PasswordBearer
+from sqlalchemy.ext.asyncio import AsyncSession
+from datetime import datetime
+from jwt import InvalidTokenError
+from pydantic import BaseModel
 
-import secrets
-import uuid
-from typing import Annotated, Any
-from time import time
+from auth.utils import encode_jwt, decode_jwt, validate_password, hash_password
+from fastapi import APIRouter, Depends, Form, HTTPException, status, Request
+from fastapi.security import OAuth2PasswordBearer
+from sqlalchemy.ext.asyncio import AsyncSession
+from datetime import datetime
+from jwt import InvalidTokenError
+from pydantic import BaseModel
 
-from fastapi import APIRouter, Depends, HTTPException, status, Header, Response, Cookie
-from fastapi.security import HTTPBasic, HTTPBasicCredentials
+from auth.utils import encode_jwt, decode_jwt, validate_password, hash_password
+from users.schemas import AccountResponse, AccountCreate, AccountLogin
+from core.models import Account
+from core.models.db_helper import db_helper
+from users.crud import get_account_by_name, create_account
 
-router = APIRouter(prefix="/demo-auth", tags=["Demo Auth"])
-
-security = HTTPBasic()
-
-
-@router.get("/basic-auth/")
-def demo_basic_auth_credentials(
-    credentials: Annotated[HTTPBasicCredentials, Depends(security)],
-):
-    return {
-        "message": "Hi!",
-        "username": credentials.username,
-        "password": credentials.password,
-    }
-
-
-usernames_to_passwords = {
-    "admin": "admin",
-    "john": "password",
-}
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/jwt/login")
 
 
-static_auth_token_to_username = {
-    "a0787852e766b02e87f6dd15e4c3d1f1": "admin",
-    "a14f178e75dee69fa66ff3fad9db0daa": "john",
-}
+class TokenInfo(BaseModel):
+    access_token: str
+    token_type: str
 
 
-def get_auth_user_username(
-    credentials: Annotated[HTTPBasicCredentials, Depends(security)],
-) -> str:
+class RegisterRequest(AccountCreate):
+    pass
+
+
+router = APIRouter(prefix="/api/auth", tags=["Auth"])
+
+
+@router.post("/register", response_model=AccountResponse)
+async def register_user(
+        account_in: AccountCreate,
+        session: AsyncSession = Depends(db_helper.session_dependency),
+) -> Account:
+    existing = await get_account_by_name(session, account_in.username)
+    if existing:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Username already exists",
+        )
+    account_in.password = hash_password(account_in.password)
+    account = await create_account(session=session, account_in=account_in )
+
+    return account
+
+
+async def validate_auth_user(
+        account_in: AccountLogin,
+        session: AsyncSession = Depends(db_helper.session_dependency),
+) -> Account:
     unauthed_exc = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Invalid username or password",
-        headers={"WWW-Authenticate": "Basic"},
     )
-    correct_password = usernames_to_passwords.get(credentials.username)
-    if correct_password is None:
+    account = await get_account_by_name(session, account_in.username)
+    if not account:
         raise unauthed_exc
 
-    # secrets
-    if not secrets.compare_digest(
-        credentials.password.encode("utf-8"),
-        correct_password.encode("utf-8"),
-    ):
+    if not validate_password(account_in.password, account.password):
         raise unauthed_exc
 
-    return credentials.username
-
-
-def get_username_by_static_auth_token(
-    static_token: str = Header(alias="x-auth-token"),
-) -> str:
-    if username := static_auth_token_to_username.get(static_token):
-        return username
-
-    raise HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="token invalid",
-    )
-
-
-@router.get("/basic-auth-username/")
-def demo_basic_auth_username(
-    auth_username: str = Depends(get_auth_user_username),
-):
-    return {
-        "message": f"Hi, {auth_username}!",
-        "username": auth_username,
-    }
-
-
-@router.get("/some-http-header-auth/")
-def demo_auth_some_http_header(
-    username: str = Depends(get_username_by_static_auth_token),
-):
-    return {
-        "message": f"Hi, {username}!",
-        "username": username,
-    }
-
-
-COOKIES: dict[str, dict[str, Any]] = {}
-COOKIE_SESSION_ID_KEY = "web-app-session-id"
-
-
-def generate_session_id() -> str:
-    return uuid.uuid4().hex
-
-
-def get_session_data(
-    session_id: str = Cookie(alias=COOKIE_SESSION_ID_KEY),
-) -> dict:
-    if session_id not in COOKIES:
+    if not account.active:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="not authenticated",
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Account inactive",
         )
 
-    return COOKIES[session_id]
+    return account
 
 
-@router.post("/login-cookie/")
-def demo_auth_login_set_cookie(
-    response: Response,
-    # auth_username: str = Depends(get_auth_user_username),
-    username: str = Depends(get_username_by_static_auth_token),
+@router.post("/login", response_model=TokenInfo)
+async def login(
+        account_in: AccountLogin,
+        session: AsyncSession = Depends(db_helper.session_dependency),
 ):
-    session_id = generate_session_id()
-    COOKIES[session_id] = {
-        "username": username,
-        "login_at": int(time()),
-    }
-    response.set_cookie(COOKIE_SESSION_ID_KEY, session_id)
-    return {"result": "ok"}
+    account = await validate_auth_user(
+        account_in=account_in,
+        session=session
+    )
 
-
-@router.get("/check-cookie/")
-def demo_auth_check_cookie(
-    user_session_data: dict = Depends(get_session_data),
-):
-    username = user_session_data["username"]
-    return {
-        "message": f"Hello, {username}!",
-        **user_session_data,
+    jwt_payload = {
+        "sub": str(account.id),
+        "username": account.username,
+        "admin": account.admin,
+        "iat": datetime.utcnow(),
     }
 
+    token = encode_jwt(jwt_payload)
+    return {"access_token": token, "token_type": "Bearer"}
 
-@router.get("/logout-cookie/")
-def demo_auth_logout_cookie(
-    response: Response,
-    session_id: str = Cookie(alias=COOKIE_SESSION_ID_KEY),
-    user_session_data: dict = Depends(get_session_data),
+
+async def get_current_account(
+        token: str = Depends(oauth2_scheme),
+        session: AsyncSession = Depends(db_helper.session_dependency),
+) -> Account:
+    try:
+        payload = decode_jwt(token)
+        account_id = int(payload["sub"])
+    except (InvalidTokenError, KeyError, ValueError) as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"Invalid token: {e}",
+        )
+
+    account = await session.get(Account, account_id)
+    if not account:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Account not found",
+        )
+
+    if not account.active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Account inactive",
+        )
+
+    return account
+
+
+@router.get("/me", response_model=AccountResponse)
+async def read_account_me(
+        account: Account = Depends(get_current_account),
 ):
-    COOKIES.pop(session_id)
-    response.delete_cookie(COOKIE_SESSION_ID_KEY)
-    username = user_session_data["username"]
-    return {
-        "message": f"Bye, {username}!",
-    }
+    return AccountResponse.model_validate(account)

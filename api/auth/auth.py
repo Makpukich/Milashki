@@ -84,6 +84,6 @@ async def get_current_account(
 
 @router.get("/accounts/me/", response_model=AccountResponse)
 async def read_account_me(
-    account: Account = Depends(get_current_account),
+    account: Depends(get_current_account),
 ):
     return AccountResponse.model_validate(account)

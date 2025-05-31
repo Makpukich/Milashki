@@ -2,35 +2,27 @@ from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from auth.utils import hash_password
 from datetime import datetime
 
-from core.models import Account as AccountModel
-from users.schemas import AccountCreate, AccountResponse
-from core.models import Account
+from core.models import Subscription as SubscriptionModel
+from users.schemas import SubscriptionCreate, SubscriptionResponse
 
 
-async def get_accounts(session: AsyncSession) -> list[AccountModel]:
-    stmt = select(AccountModel).order_by(AccountModel.id)
+async def get_subscriptions(session: AsyncSession) -> list[SubscriptionModel]:
+    stmt = select(SubscriptionModel).order_by(SubscriptionModel.id)
     result = await session.execute(stmt)
     return result.scalars().all()
 
-async def get_account_by_id(session: AsyncSession, account_id: int) -> AccountModel | None:
-    account = await session.get(AccountModel, account_id)
+async def get_subscription(session: AsyncSession, account_id: int) -> SubscriptionModel | None:
+    account = await session.get(SubscriptionModel, account_id)
     return account
 
-async def get_account_by_name(session: AsyncSession, account_name: str) -> AccountModel | None:
-    stmt = select(Account).where(account_name == Account.username)
-    account = await session.execute(stmt)
-    return account.scalar_one_or_none()
-
-
-async def create_account(
+async def create_subscription(
         session: AsyncSession,
-        account_in: AccountCreate
-) -> Account:
+        subscription_in: SubscriptionCreate
+) -> SubscriptionModel:
     existing_account = await session.execute(
-        select(Account).where(account_in.username == Account.username)
+        select(SubscriptionModel).where(subscription_in.name == Subscription.name)
     )
     if existing_account.scalar_one_or_none() is not None:
         raise HTTPException(
@@ -77,15 +69,3 @@ async def delete_account(session: AsyncSession, account_id) -> AccountResponse |
     return account
 
 
-
-
-"""from users.schemas import CreateUser
-
-
-def create_user(user_in: CreateUser) -> dict:
-    user = user_in.model_dump()
-    return {
-        "success": True,
-        "user": user,
-    }
-"""
