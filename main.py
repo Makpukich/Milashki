@@ -8,6 +8,7 @@ from core.config import settings
 from api import router as router_v1
 from users.views import router as users_router
 from subscriptions.views import router as sub_router
+from user_subs.views import router as user_subs_router
 from core.models import db_helper, Base
 
 @asynccontextmanager
@@ -31,6 +32,7 @@ app.add_middleware(
 app.include_router(router=router_v1)
 app.include_router(users_router)
 app.include_router(sub_router)
+app.include_router(user_subs_router)
 
 
 
