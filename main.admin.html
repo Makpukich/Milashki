@@ -67,12 +67,6 @@
             border-left: 4px solid #e74c3c;
         }
 
-        .user-info {
-            text-align: right;
-            margin-bottom: 20px;
-            color: #7f8c8d;
-        }
-
         .logout-btn {
             display: block;
             width: 150px;
@@ -95,29 +89,25 @@
 </head>
 <body>
     <div class="container">
-        <div class="user-info">
-            Пользователь: <span id="username">Гость</span>
-        </div>
-
         <h1>Личный кабинет</h1>
 
         <div class="options-grid">
-            <div class="option-card" onclick="window.location.href='/my_subscribtions'">
+            <div class="option-card" onclick="window.location.href='/my_subscribtions.html'">
                 <h2>Мои подписки</h2>
                 <p>Просмотр и управление текущими подписками</p>
             </div>
 
-            <div class="option-card" onclick="window.location.href='/possible_subscribtion'">
+            <div class="option-card" onclick="window.location.href='/possible_subscribtion.html'">
                 <h2>Возможные подписки</h2>
                 <p>Ознакомьтесь с доступными подписками</p>
             </div>
 
-            <div class="option-card" onclick="window.location.href='/balance'">
+            <div class="option-card" onclick="window.location.href='/balance.html'">
                 <h2>Мой баланс</h2>
                 <p>Проверьте состояние вашего счета</p>
             </div>
 
-            <div class="option-card" onclick="window.location.href='/index.html'">
+            <div class="option-card" onclick="window.location.href='index.html'">
                 <h2>Admin Panel</h2>
                 <p>Панель администратора системы</p>
             </div>
@@ -131,8 +121,6 @@
             // Проверка авторизации (пример)
             const isAdmin = localStorage.getItem('isAdmin') === 'true';
             const username = localStorage.getItem('username') || 'Гость';
-
-            document.getElementById('username').textContent = username;
 
             // Показываем Admin Panel только для администраторов
             if (!isAdmin) {
