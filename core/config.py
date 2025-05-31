@@ -21,7 +21,7 @@ class AuthJWT(BaseModel):
 
 
 class Settings(BaseSettings):
-    api_prefix: str = "/api"
+    api_prefix: str = ""
 
     db: DbSettings = DbSettings()
 

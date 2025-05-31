@@ -199,14 +199,14 @@
                     showMessage('Авторизация успешна! Перенаправление...', 'success');
 
                     // Сохраняем токен (если используется JWT)
-                    if (data.token) {
-                        localStorage.setItem('authToken', data.token);
+                    if (data.access_token) {
+                        localStorage.setItem('authToken', data.access_token);
                     }
 
                     // Определяем, куда перенаправлять пользователя
                     let redirectUrl = '/main.html';
-                    if (data.isAdmin) {
-                        redirectUrl = '/main_admin.html';
+                    if (data.admin) {
+                        redirectUrl = '/main.admin.html';
                     }
 
                     // Перенаправляем на соответствующую страницу

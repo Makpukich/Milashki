@@ -31,7 +31,7 @@ class RegisterRequest(AccountCreate):
     pass
 
 
-router = APIRouter(prefix="/api/auth", tags=["Auth"])
+router = APIRouter(prefix="/auth", tags=["Auth"])
 
 
 @router.post("/register", response_model=AccountResponse)

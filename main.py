@@ -26,7 +26,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(router=router_v1, prefix=settings.api_prefix)
+app.include_router(router=router_v1)
 app.include_router(users_router)
 
 
