@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from datetime import datetime
 
 from core.models import Subscription as SubscriptionModel
-from users.schemas import SubscriptionCreate, SubscriptionResponse
+from subscriptions.schemas import SubscriptionBase, SubscriptionResponse
 
 
 async def get_subscriptions(session: AsyncSession) -> list[SubscriptionModel]:
@@ -13,59 +13,58 @@ async def get_subscriptions(session: AsyncSession) -> list[SubscriptionModel]:
     result = await session.execute(stmt)
     return result.scalars().all()
 
-async def get_subscription(session: AsyncSession, account_id: int) -> SubscriptionModel | None:
-    account = await session.get(SubscriptionModel, account_id)
-    return account
+async def get_subscription(session: AsyncSession, subscription_id: int) -> SubscriptionModel | None:
+    subscription = await session.get(SubscriptionModel, subscription_id)
+    return subscription
 
 async def create_subscription(
         session: AsyncSession,
-        subscription_in: SubscriptionCreate
+        subscription_in: SubscriptionBase
 ) -> SubscriptionModel:
-    existing_account = await session.execute(
-        select(SubscriptionModel).where(subscription_in.name == Subscription.name)
+    existing_subscription = await session.execute(
+        select(SubscriptionModel).where(subscription_in.name == SubscriptionModel.name)
     )
-    if existing_account.scalar_one_or_none() is not None:
+    if existing_subscription.scalar_one_or_none() is not None:
         raise HTTPException(
             status_code=400,
-            detail="Username already exists"
+            detail="Subscription already exists"
         )
 
-    account = Account(
-        username=account_in.username,
-        password=account_in.password,
-        admin=account_in.admin,
-        active=account_in.active,
-        created_at=int(datetime.now().timestamp())
+    subscription = SubscriptionModel(
+        name=subscription_in.name,
+        cost=subscription_in.cost,
+        duration=subscription_in.duration,
+        access=subscription_in.access,
     )
 
-    session.add(account)
+    session.add(subscription)
     await session.commit()
-    await session.refresh(account)
+    await session.refresh(subscription)
 
-    return account
+    return subscription
 
-async def update_account(session: AsyncSession, account_id: int, new_account: AccountResponse) -> AccountResponse | None:
-    account = await get_account_by_id(session, account_id)
-    if account:
-        account.username = new_account.username
-        account.password = new_account.password
-        account.admin = new_account.admin
-        account.active = new_account.active
+async def update_subscription(session: AsyncSession, subscription_id: int, new_subscription: SubscriptionBase) -> SubscriptionResponse | None:
+    subscription = await get_subscription(session, subscription_id)
+    if subscription:
+        subscription.name = new_subscription.name
+        subscription.cost = new_subscription.cost
+        subscription.duration = new_subscription.duration
+        subscription.access = new_subscription.access
     await session.commit()
-    await session.refresh(account)
-    return account
+    await session.refresh(subscription)
+    return subscription
 
-async def delete_account(session: AsyncSession, account_id) -> AccountResponse | None:
-    account = await get_account_by_id(session, account_id)
+async def delete_subscription(session: AsyncSession, subscription_id) -> SubscriptionResponse | None:
+    subscription = await get_subscription(session, subscription_id)
 
-    if account is None:
+    if subscription is None:
         raise HTTPException(
             status_code=404,
-            detail="Account not found"
+            detail="Subscription not found"
         )
 
-    await session.delete(account)
+    await session.delete(subscription)
     await session.commit()
-    return account
+    return subscription
 
 
