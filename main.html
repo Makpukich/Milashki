@@ -92,7 +92,7 @@
 <body>
     <div class="container">
         <div class="user-info" id="userInfo">
-            Пользователь: <span id="username"></span>
+            <span id="username"></span>
         </div>
 
         <h1>Добро пожаловать в личный кабинет</h1>
@@ -121,7 +121,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Получаем имя пользователя из localStorage или сессии
             // Это пример - вам нужно адаптировать под вашу систему авторизации
-            const username = localStorage.getItem('username') || 'Пользователь';
+            const username = localStorage.getItem('username') || '';
             document.getElementById('username').textContent = username;
 
             // Можно добавить проверку авторизации

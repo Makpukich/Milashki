@@ -10,6 +10,10 @@ class AccountBase(BaseModel):
 class AccountCreate(AccountBase):
     password: str
 
+class AccountLogin(BaseModel):
+    username: str
+    password: str
+
 class AccountResponse(AccountBase):
     id: int
 
