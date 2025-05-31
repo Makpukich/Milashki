@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Главная страница</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .option-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 25px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .option-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-color: #3498db;
+        }
+
+        .option-card h2 {
+            color: #2c3e50;
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+
+        .option-card p {
+            color: #7f8c8d;
+            margin-bottom: 0;
+        }
+
+        .admin-card {
+            border-left: 4px solid #e74c3c;
+        }
+
+        .user-info {
+            text-align: right;
+            margin-bottom: 20px;
+            color: #7f8c8d;
+        }
+
+        .logout-btn {
+            display: block;
+            width: 150px;
+            margin: 30px auto 0;
+            padding: 10px;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            text-align: center;
+            transition: background-color 0.3s;
+        }
+
+        .logout-btn:hover {
+            background-color: #c0392b;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="user-info">
+            Пользователь: <span id="username">Гость</span>
+        </div>
+
+        <h1>Личный кабинет</h1>
+
+        <div class="options-grid">
+            <div class="option-card" onclick="window.location.href='/my_subscribtions'">
+                <h2>Мои подписки</h2>
+                <p>Просмотр и управление текущими подписками</p>
+            </div>
+
+            <div class="option-card" onclick="window.location.href='/possible_subscribtion'">
+                <h2>Возможные подписки</h2>
+                <p>Ознакомьтесь с доступными подписками</p>
+            </div>
+
+            <div class="option-card" onclick="window.location.href='/balance'">
+                <h2>Мой баланс</h2>
+                <p>Проверьте состояние вашего счета</p>
+            </div>
+
+            <div class="option-card" onclick="window.location.href='/index.html'">
+                <h2>Admin Panel</h2>
+                <p>Панель администратора системы</p>
+            </div>
+        </div>
+
+        <button class="logout-btn" onclick="window.location.href='/logout'">Выйти</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Проверка авторизации (пример)
+            const isAdmin = localStorage.getItem('isAdmin') === 'true';
+            const username = localStorage.getItem('username') || 'Гость';
+
+            document.getElementById('username').textContent = username;
+
+            // Показываем Admin Panel только для администраторов
+            if (!isAdmin) {
+                document.getElementById('adminPanel').style.display = 'none';
+            }
+
+            // Если пользователь не авторизован, перенаправляем на страницу входа
+            /*
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                window.location.href = '/login.html';
+            }
+            */
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Главная страница</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .option-card {
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .option-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-color: #3498db;
+        }
+
+        .option-card h2 {
+            color: #2c3e50;
+            margin-top: 0;
+        }
+
+        .option-card p {
+            color: #7f8c8d;
+            margin-bottom: 0;
+        }
+
+        .logout-btn {
+            display: block;
+            width: 100px;
+            margin: 30px auto 0;
+            padding: 10px;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            text-align: center;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+
+        .logout-btn:hover {
+            background-color: #c0392b;
+        }
+
+        .user-info {
+            text-align: right;
+            margin-bottom: 20px;
+            color: #7f8c8d;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="user-info" id="userInfo">
+            Пользователь: <span id="username"></span>
+        </div>
+
+        <h1>Добро пожаловать в личный кабинет</h1>
+
+        <div class="options-container">
+            <div class="option-card" onclick="window.location.href='/my_subscribtions'">
+                <h2>Мои подписки</h2>
+                <p>Просмотр и управление текущими подписками</p>
+            </div>
+
+            <div class="option-card" onclick="window.location.href='/possible_subscribtions'">
+                <h2>Возможные подписки</h2>
+                <p>Ознакомьтесь с доступными подписками</p>
+            </div>
+
+            <div class="option-card" onclick="window.location.href='/balans'">
+                <h2>Мой баланс</h2>
+                <p>Проверьте состояние вашего счета</p>
+            </div>
+        </div>
+
+        <a href="/logout" class="logout-btn">Выйти</a>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Получаем имя пользователя из localStorage или сессии
+            // Это пример - вам нужно адаптировать под вашу систему авторизации
+            const username = localStorage.getItem('username') || 'Пользователь';
+            document.getElementById('username').textContent = username;
+
+            // Можно добавить проверку авторизации
+            // Если пользователь не авторизован - перенаправить на страницу входа
+            /*
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                window.location.href = '/login.html';
+            }
+            */
+        });
+    </script>
+</body>
+</html>
