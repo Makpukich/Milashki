@@ -1,66 +1,65 @@
-# Milashki API 
-### Это серверная часть веб-приложения для управления подписками пользователей. Проект реализован на FastAPI с использованием асинхронного SQLAlchemy для работы с базой данных.
+# Milashki API  
+### This is the server part of a web application for managing user subscriptions.
 
-## Технологический стек
-- Python 3.12
-- FastAPI - веб-фреймворк
-- SQLAlchemy (асинхронный) - ORM
-- Uvicorn - ASGI-сервер
-- Pydantic - валидация данных
-- JWT - аутентификация
+## Technology Stack  
+- Python 3.12  
+- FastAPI - web framework  
+- SQLAlchemy (async) - ORM  
+- Uvicorn - ASGI server  
+- Pydantic - data validation  
+- JWT - authentication  
 
+## Installation  
 
-## Установка
+Clone the repository:  
+```bash  
+git clone https://github.com/yourusername/milashki-api.git  
+cd milashki-api  
+```  
 
-Клонировать репозиторий:
-```bash
-git clone https://github.com/yourusername/milashki-api.git
-cd milashki-api
-```
+Run:  
+```bash  
+uvicorn main:app --reload  
+```  
+After launching, the API will be available at: http://localhost:8000  
 
-Запуск
-```bash
-uvicorn main:app --reload
-```
-После запуска API будет доступно по адресу: http://localhost:8000
+## All API Endpoints  
+### Authentication  
+`POST /auth/register` - User registration  
 
-## Все эндпоинты API
-### Аутентификация
-`POST /auth/register` - Регистрация пользователя
+`POST /auth/login` - Login (get JWT)  
 
-`POST /auth/login` - Вход в систему (получение JWT)
+`GET /auth/me` - Current user info  
 
-`GET /auth/me` - Информация о текущем пользователе
+### Account Management  
+`GET /accounts/` - List all accounts  
 
-### Управление аккаунтами
-`GET /accounts/` - Список всех аккаунтов
+`POST /accounts/` - Create an account  
 
-`POST /accounts/` - Создание аккаунта
+`GET /accounts/<id>` - Get an account  
 
-`GET /accounts/<id>` - Получение аккаунта
+`PUT /accounts/<id>` - Update an account  
 
-`PUT /accounts/<id>` - Обновление аккаунта
+`DELETE /accounts/<id>` - Delete an account  
 
-`DELETE /accounts/<id>` - Удаление аккаунта
+### Subscription Management  
+`GET /subscriptions/` - List all subscriptions  
 
-### `Управление подписками
-`GET /subscriptions/` - Список всех подписок
+`POST /subscriptions/` - Create a subscription  
 
-`POST /subscriptions/` - Создание подписки
+`GET /subscriptions/<id>` - Get a subscription  
 
-`GET /subscriptions/<id>` - Получение подписки
+`PUT /subscriptions/<id>` - Update a subscription  
 
-`PUT /subscriptions/<id>` - Обновление подписки
+`DELETE /subscriptions/<id>` - Delete a subscription  
 
-`DELETE /subscriptions/<id>` - Удаление подписки
+### User Subscriptions  
+`GET /User_subs/` - All user subscriptions  
 
-### Пользовательские подписки
-`GET /User_subs/` - Все пользовательские подписки
+`POST /User_subs/` - Add a subscription to a user  
 
-`POST /User_subs/` - Добавление подписки пользователю
+`GET /User_subs/<user_id>/<subscription_id>` - Specific user subscription  
 
-`GET /User_subs/<user_id>/<subscription_id>` - Конкретная подписка пользователя
+`GET /subscriptions/<user_id>` - Subscriptions of a specific user  
 
-`GET /subscriptions/<user_id>` - Подписки конкретного пользователя
-
-`DELETE /subscriptions/<user_id>/<sub_id>` - Удаление подписки у пользователя
+`DELETE /subscriptions/<user_id>/<sub_id>` - Remove a subscription from a user
