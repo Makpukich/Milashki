@@ -13,8 +13,8 @@
 
 Clone the repository:  
 ```bash  
-git clone https://github.com/yourusername/milashki-api.git  
-cd milashki-api  
+git clone https://github.com/Makpukich/Milashki.git
+cd milashki  
 ```  
 
 Run:  
